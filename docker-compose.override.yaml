@@ -1,0 +1,23 @@
+services:
+  postiz:
+    image: postiz-pisicat:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MAIN_URL: https://social.pisi.cat
+      FRONTEND_URL: https://social.pisi.cat
+      NEXT_PUBLIC_BACKEND_URL: https://social.pisi.cat/api
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      DATABASE_URL: postgresql://postiz-user:${POSTIZ_DB_PASSWORD:?Set POSTIZ_DB_PASSWORD in .env}@postiz-postgres:5432/postiz-db-local
+      DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-true}
+      FACEBOOK_APP_ID: ${FACEBOOK_APP_ID:-}
+      FACEBOOK_APP_SECRET: ${FACEBOOK_APP_SECRET:-}
+      TIKTOK_CLIENT_ID: ${TIKTOK_CLIENT_ID:-}
+      TIKTOK_CLIENT_SECRET: ${TIKTOK_CLIENT_SECRET:-}
+    ports: !override
+      - 172.19.0.1:4007:5000
+
+  postiz-postgres:
+    environment:
+      POSTGRES_PASSWORD: ${POSTIZ_DB_PASSWORD:?Set POSTIZ_DB_PASSWORD in .env}
