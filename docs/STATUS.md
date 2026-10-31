@@ -1,37 +1,41 @@
-# Stare și lucruri rămase
+# Scop, stare și limite
 
-## Implementat la 23 august 2026
+## Scop
 
-- Postiz self-hosted la `https://social.pisi.cat`, cu TLS;
-- registration dezactivat după crearea ownerului;
-- stack Postiz/Postgres/Redis/Temporal sănătos;
-- TikTok Sandbox conectat ca Target User;
-- workaround minimal pentru scope-uri Sandbox;
-- upload real TikTok în inbox confirmat prin `SEND_TO_USER_INBOX`;
-- pisi-cat-web generează 9:16 cu audio și ține auditul/reminderele;
-- 4 GiB swap persistent adăugat hostului pentru vârfuri de memorie.
+Repository-ul oferă un stack Postiz self-hosted, reutilizabil pentru orice domeniu și orice
+aplicație client. Nu conține logică de business, modele editoriale, baze de date, media sau
+secrete.
 
-## Stare aplicație
+## Ce oferă
 
-- automatizarea Django este activă, dar `dry_run=True` după test;
-- TikTok este activ în modul `UPLOAD`;
-- Facebook și Instagram sunt dezactivate;
-- există un upload TikTok care așteaptă finalizarea manuală;
-- cheile TikTok folosite în configurare trebuie rotite.
+- Postiz, PostgreSQL, Redis și Temporal, prin compose-ul oficial;
+- URL public și port de bind configurabile prin `.env`;
+- imagine derivată local, cu patch opțional pentru TikTok Sandbox;
+- exemplu de reverse proxy nginx cu TLS;
+- proceduri de operare, upgrade, backup și incidente.
 
-## De făcut
+## Stare
 
-1. Rotește Client Secret TikTok Sandbox și actualizează `.env`.
-2. Reconectează canalul TikTok și actualizează Integration ID în pisi-cat-web dacă se schimbă.
-3. Creează aplicația Meta și conectează Facebook Page + Instagram Professional.
-4. Configurează webhookul Postiz către pisi.cat și validează payloadul real cu Send Test.
-5. Adaugă backup pentru volume și un test documentat de restore.
-6. Adaugă monitorizare pentru healthchecks, disc, memorie și erori Temporal.
-7. Decide viitorul TikTok:
-   - păstrare `UPLOAD` cu finalizare manuală; sau
-   - composer public conform și audit Direct Post.
-8. Elimină patchul Sandbox după migrarea pe aplicația Production aprobată.
+- configurația compose a fost validată local cu Docker Compose v2.24+; stack-ul complet se
+  verifică pe hostul fiecărei instalări;
+- patch-ul TikTok Sandbox este opțional și se activează prin `TIKTOK_SANDBOX_PATCH`;
+- nu există garanție pentru versiuni viitoare ale Postiz: buildul eșuează intenționat dacă
+  upstream schimbă blocurile modificate.
 
-TikTok Direct Post nu trebuie activat doar prin schimbarea unei variabile. Necesită audit și
-UX conform: creator info, preview, selecții manuale fără defaults, disclosure comercial,
-Music Usage Confirmation și consimțământ explicit.
+## Limite cunoscute
+
+- necesită compose-ul oficial Postiz clonat separat;
+- nu administrează certificatele TLS și nici DNS-ul;
+- nu include monitorizare, alertare sau backup automat;
+- patch-ul TikTok Sandbox este temporar și nu înlocuiește aprobarea Production;
+- TikTok Direct Post necesită audit și un flux conform în aplicația client.
+
+## Checklist înainte de producție
+
+1. `PUBLIC_URL` este corect și fără `/` final.
+2. `JWT_SECRET` și `POSTIZ_DB_PASSWORD` sunt aleatorii și unice.
+3. `DISABLE_REGISTRATION=true` după crearea ownerului.
+4. Postiz nu este expus direct; reverse proxy-ul termină TLS.
+5. Backup pentru PostgreSQL și volume, cu restore testat.
+6. O publicare de test a trecut cap-coadă.
+7. Cheile OAuth pot fi rotite fără pierderea canalelor.

@@ -1,13 +1,15 @@
 services:
   postiz:
-    image: postiz-pisicat:latest
+    image: ${POSTIZ_IMAGE:-postiz-custom:latest}
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        TIKTOK_SANDBOX_PATCH: ${TIKTOK_SANDBOX_PATCH:-true}
     environment:
-      MAIN_URL: https://social.pisi.cat
-      FRONTEND_URL: https://social.pisi.cat
-      NEXT_PUBLIC_BACKEND_URL: https://social.pisi.cat/api
+      MAIN_URL: ${PUBLIC_URL:?Set PUBLIC_URL in .env}
+      FRONTEND_URL: ${PUBLIC_URL:?Set PUBLIC_URL in .env}
+      NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_URL:?Set PUBLIC_URL in .env}/api
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
       DATABASE_URL: postgresql://postiz-user:${POSTIZ_DB_PASSWORD:?Set POSTIZ_DB_PASSWORD in .env}@postiz-postgres:5432/postiz-db-local
       DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-true}
@@ -16,7 +18,7 @@ services:
       TIKTOK_CLIENT_ID: ${TIKTOK_CLIENT_ID:-}
       TIKTOK_CLIENT_SECRET: ${TIKTOK_CLIENT_SECRET:-}
     ports: !override
-      - 172.19.0.1:4007:5000
+      - ${BIND_ADDRESS:-127.0.0.1}:${BIND_PORT:-4007}:5000
 
   postiz-postgres:
     environment:
